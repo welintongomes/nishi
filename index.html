@@ -1394,7 +1394,6 @@
     </div>
     <!-- <script src="script.js"></script> -->
     <script>
-        
         // Substituição da função openCustomizePriceModal com a correção para atualização imediata do preço
         function openCustomizePriceModal(partName, repairType) {
             // Verifica se já existe um modal de customização e remove
@@ -2525,632 +2524,554 @@
         }
         //gerar o orçamento em pdf    
         // Função principal para gerar e mostrar opções de envio
-        // Função principal para gerar e mostrar opções de envio
-function generatePDF() {
-    if (selectedParts.length === 0) {
-        showNotification("Selecione pelo menos uma peça para gerar o orçamento!");
-        return;
-    }
+        // Função principal para gerar PDF
+        function generatePDF() {
+            if (selectedParts.length === 0) {
+                showNotification("Selecione pelo menos uma peça para gerar o orçamento!");
+                return;
+            }
 
-    // Gerar o orçamento
-    const orcamento = gerarOrcamento();
-    
-    // Mostrar modal com opções de envio
-    mostrarOpcoesEnvio(orcamento);
-}
-
-// Função para gerar os dados do orçamento
-function gerarOrcamento() {
-    const vehicleSelect = document.getElementById("vehicle-type");
-    const vehicleText = vehicleSelect.options[vehicleSelect.selectedIndex].text;
-    
-    let total = 0;
-    selectedParts.forEach(item => {
-        total += item.price;
-    });
-
-    return {
-        veiculo: vehicleText,
-        itens: selectedParts,
-        total: total,
-        data: new Date().toLocaleDateString('pt-BR'),
-        numero: Math.floor(Math.random() * 10000) + 1000 // Número do orçamento
-    };
-}
-
-// Função para mostrar modal com opções
-function mostrarOpcoesEnvio(orcamento) {
-    // Criar modal se não existir
-    let modal = document.getElementById('modal-opcoes');
-    if (!modal) {
-        modal = criarModalOpcoes();
-    }
-
-    // Mostrar modal
-    modal.style.display = 'block';
-    
-    // Configurar eventos dos botões
-    document.getElementById('btn-whatsapp').onclick = () => enviarWhatsApp(orcamento);
-    document.getElementById('btn-email').onclick = () => enviarEmail(orcamento);
-    document.getElementById('btn-imprimir').onclick = () => imprimirPDF(orcamento);
-    document.getElementById('btn-baixar-pdf').onclick = () => baixarPDF(orcamento);
-    document.getElementById('btn-fechar-modal').onclick = () => modal.style.display = 'none';
-    
-    // Configurar eventos dos radio buttons de formato
-    const formatoTexto = document.getElementById('formato-texto');
-    const formatoPdf = document.getElementById('formato-pdf');
-    const divFormatoPdf = document.getElementById('div-formato-pdf');
-    
-    function toggleFormatoOptions() {
-        if (formatoPdf.checked) {
-            divFormatoPdf.style.display = 'block';
-        } else {
-            divFormatoPdf.style.display = 'none';
+            const orcamento = gerarOrcamento();
+            mostrarOpcoesEnvio(orcamento);
         }
-    }
-    
-    formatoTexto.onchange = toggleFormatoOptions;
-    formatoPdf.onchange = toggleFormatoOptions;
-    
-    // Inicializar estado
-    toggleFormatoOptions();
-}
+        // Função para gerar os dados do orçamento
+        // Função para gerar os dados do orçamento
+        function gerarOrcamento() {
+            const vehicleSelect = document.getElementById("vehicle-type");
+            const vehicleText = vehicleSelect.options[vehicleSelect.selectedIndex].text;
 
-// Função para criar o modal de opções
-function criarModalOpcoes() {
-    const modalHTML = `
-        <div id="modal-opcoes" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-            <div style="background-color: #fefefe; margin: 10% auto; padding: 25px; border: none; border-radius: 12px; width: 500px; max-width: 85%; max-height: 80vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <h2 style="margin: 0; color: #333; font-size: 22px;">📋 Enviar Orçamento</h2>
-                    <span id="btn-fechar-modal" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; padding: 5px;">&times;</span>
+            let total = 0;
+            selectedParts.forEach(item => {
+                total += item.price;
+            });
+
+            return {
+                veiculo: vehicleText,
+                itens: selectedParts,
+                total: total,
+                data: new Date().toLocaleDateString('pt-BR'),
+                numero: Math.floor(Math.random() * 10000) + 1000
+            };
+        }
+        // Função para mostrar modal com opções
+        // Modal responsivo com melhor UX mobile
+        function mostrarOpcoesEnvio(orcamento) {
+            let modal = document.getElementById('modal-opcoes');
+            if (!modal) {
+                modal = criarModalOpcoes();
+            }
+
+            modal.style.display = 'flex';
+
+            // Configurar eventos
+            document.getElementById('btn-whatsapp').onclick = () => enviarWhatsApp(orcamento);
+            document.getElementById('btn-email').onclick = () => enviarEmail(orcamento);
+            document.getElementById('btn-download').onclick = () => baixarPDF(orcamento);
+            document.getElementById('btn-fechar-modal').onclick = () => modal.style.display = 'none';
+
+            // Fechar modal clicando fora
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            };
+        }
+        // Função para criar o modal de opções
+        // Modal otimizado para mobile
+        function criarModalOpcoes() {
+            const modalHTML = `
+        <div id="modal-opcoes" style="
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        ">
+            <div style="
+                background: white;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 400px;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            ">
+                <div style="
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <h2 style="margin: 0; font-size: 18px; color: #333;">Enviar Orçamento</h2>
+                    <span id="btn-fechar-modal" style="
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        background: #f5f5f5;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        font-size: 20px;
+                        color: #666;
+                    ">&times;</span>
                 </div>
                 
-                <!-- Seção de Formato de Envio -->
-                <div style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #2c5aa0;">
-                    <h3 style="margin: 0 0 15px 0; color: #2c5aa0; font-size: 16px;">📤 Formato de Envio</h3>
-                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 14px;">
-                            <input type="radio" name="formato-envio" id="formato-texto" value="texto" checked style="margin-right: 8px; transform: scale(1.2);">
-                            <span>📝 Texto (WhatsApp/Email)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 14px;">
-                            <input type="radio" name="formato-envio" id="formato-pdf" value="pdf" style="margin-right: 8px; transform: scale(1.2);">
-                            <span>📄 Arquivo PDF</span>
-                        </label>
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">WhatsApp:</label>
+                        <input type="tel" id="cliente-whatsapp" placeholder="(11) 99999-9999" style="
+                            width: 100%;
+                            padding: 12px;
+                            border: 2px solid #ddd;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            box-sizing: border-box;
+                        ">
                     </div>
-                </div>
-                
-                <!-- Opções para PDF -->
-                <div id="div-formato-pdf" style="display: none; margin-bottom: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-                    <p style="margin: 0 0 10px 0; color: #856404; font-size: 14px;">
-                        ⚠️ <strong>Modo PDF:</strong> O orçamento será enviado como arquivo anexo (funciona melhor no computador)
-                    </p>
-                    <div style="margin-top: 15px;">
-                        <button id="btn-baixar-pdf" style="width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 10px;">
-                            💾 Baixar PDF
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Email:</label>
+                        <input type="email" id="cliente-email" placeholder="cliente@email.com" style="
+                            width: 100%;
+                            padding: 12px;
+                            border: 2px solid #ddd;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            box-sizing: border-box;
+                        ">
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button id="btn-whatsapp" style="
+                            width: 100%;
+                            padding: 15px;
+                            background: #25D366;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        ">
+                            📱 Enviar por WhatsApp
+                        </button>
+                        
+                        <button id="btn-email" style="
+                            width: 100%;
+                            padding: 15px;
+                            background: #0066cc;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        ">
+                            📧 Enviar por Email
+                        </button>
+                        
+                        <button id="btn-download" style="
+                            width: 100%;
+                            padding: 15px;
+                            background: #28a745;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        ">
+                            📄 Baixar PDF
                         </button>
                     </div>
-                </div>
-                
-                <!-- Dados do Cliente -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">👤 Dados do Cliente</h3>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">WhatsApp:</label>
-                        <input type="tel" id="cliente-whatsapp" placeholder="(11) 99999-9999" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">Email:</label>
-                        <input type="email" id="cliente-email" placeholder="cliente@email.com" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
-                    </div>
-                </div>
-                
-                <!-- Botões de Ação -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 25px;">
-                    <button id="btn-whatsapp" style="padding: 14px 10px; background: #25D366; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
-                        📱 WhatsApp
-                    </button>
-                    <button id="btn-email" style="padding: 14px 10px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
-                        📧 Email
-                    </button>
-                    <button id="btn-imprimir" style="padding: 14px 10px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
-                        🖨️ Imprimir
-                    </button>
-                </div>
-                
-                <div style="margin-top: 15px; text-align: center;">
-                    <small style="color: #666;">💡 Dica: Para envio de PDF, recomendamos usar o computador</small>
                 </div>
             </div>
         </div>
     `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Adicionar estilos de hover aos botões
-    const style = document.createElement('style');
-    style.textContent = `
-        #modal-opcoes button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            return document.getElementById('modal-opcoes');
         }
-        #btn-whatsapp:hover { background: #128C7E !important; }
-        #btn-email:hover { background: #0052a3 !important; }
-        #btn-imprimir:hover { background: #555 !important; }
-        #btn-baixar-pdf:hover { background: #218838 !important; }
-    `;
-    document.head.appendChild(style);
-    
-    return document.getElementById('modal-opcoes');
-}
+        // Função para enviar via WhatsApp
+        // WhatsApp melhorado
+        function enviarWhatsApp(orcamento) {
+            const telefone = document.getElementById('cliente-whatsapp').value.trim();
 
-// Função para verificar se deve enviar como PDF
-function isEnvioPDF() {
-    const formatoPdf = document.getElementById('formato-pdf');
-    return formatoPdf && formatoPdf.checked;
-}
+            if (!telefone) {
+                showNotification('Informe o WhatsApp do cliente!', 'error');
+                return;
+            }
 
-// Função para enviar via WhatsApp
-function enviarWhatsApp(orcamento) {
-    const telefone = document.getElementById('cliente-whatsapp').value;
-    
-    if (!telefone.trim()) {
-        alert('Por favor, informe o WhatsApp do cliente!');
-        return;
-    }
+            const telefoneNumerico = telefone.replace(/\D/g, '');
+            const texto = gerarTextoOrcamento(orcamento);
+            const url = `https://wa.me/55${telefoneNumerico}?text=${encodeURIComponent(texto)}`;
 
-    // Remover caracteres não numéricos
-    const telefoneNumerico = telefone.replace(/\D/g, '');
-    
-    if (isEnvioPDF()) {
-        // Enviar como PDF
-        enviarPDFWhatsApp(orcamento, telefoneNumerico);
-    } else {
-        // Enviar como texto
-        const textoOrcamento = gerarTextoOrcamento(orcamento);
-        const whatsappURL = `https://wa.me/55${telefoneNumerico}?text=${encodeURIComponent(textoOrcamento)}`;
-        window.open(whatsappURL, '_blank');
-        showNotification('Redirecionando para WhatsApp...');
-    }
-    
-    // Fechar modal
-    document.getElementById('modal-opcoes').style.display = 'none';
-}
+            window.open(url, '_blank');
+            document.getElementById('modal-opcoes').style.display = 'none';
+            showNotification('Redirecionando para WhatsApp...');
+        }
+        // Função para enviar via Email
+        // Email melhorado
+        function enviarEmail(orcamento) {
+            const email = document.getElementById('cliente-email').value.trim();
 
-// Função para enviar PDF via WhatsApp
-function enviarPDFWhatsApp(orcamento, telefoneNumerico) {
-    // Gerar e baixar o PDF primeiro
-    baixarPDF(orcamento);
-    
-    // Abrir WhatsApp com mensagem explicativa
-    const mensagem = `🔧 *ORÇAMENTO DE FUNILARIA* 🔧\n\n` +
-                    `Olá! Segue o orçamento #${orcamento.numero} para seu veículo ${orcamento.veiculo}.\n\n` +
-                    `📄 O arquivo PDF foi baixado no seu computador.\n` +
-                    `Por favor, anexe o arquivo nesta conversa.\n\n` +
-                    `💰 *Valor Total: R$ ${orcamento.total.toFixed(2)}*\n\n` +
-                    `Qualquer dúvida, estou à disposição! 😊`;
-    
-    const whatsappURL = `https://wa.me/55${telefoneNumerico}?text=${encodeURIComponent(mensagem)}`;
-    window.open(whatsappURL, '_blank');
-    
-    showNotification('PDF baixado! Anexe o arquivo no WhatsApp.');
-}
+            if (!email) {
+                showNotification('Informe o email do cliente!', 'error');
+                return;
+            }
 
-// Função para enviar via Email
-function enviarEmail(orcamento) {
-    const email = document.getElementById('cliente-email').value;
-    
-    if (!email.trim()) {
-        alert('Por favor, informe o email do cliente!');
-        return;
-    }
+            const assunto = `Orçamento de Funilaria #${orcamento.numero}`;
+            const corpo = gerarTextoOrcamento(orcamento);
+            const url = `mailto:${email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
 
-    const assunto = `Orçamento de Funilaria #${orcamento.numero}`;
-    
-    if (isEnvioPDF()) {
-        // Enviar como PDF
-        enviarPDFEmail(orcamento, email, assunto);
-    } else {
-        // Enviar como texto
-        const corpo = gerarTextoOrcamento(orcamento);
-        const emailURL = `mailto:${email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-        window.location.href = emailURL;
-        showNotification('Abrindo cliente de email...');
-    }
-    
-    // Fechar modal
-    document.getElementById('modal-opcoes').style.display = 'none';
-}
+            window.location.href = url;
+            document.getElementById('modal-opcoes').style.display = 'none';
+            showNotification('Abrindo cliente de email...');
+        }
 
-// Função para enviar PDF via Email
-function enviarPDFEmail(orcamento, email, assunto) {
-    // Gerar e baixar o PDF primeiro
-    baixarPDF(orcamento);
-    
-    // Criar corpo do email explicativo
-    const corpo = `Prezado(a) Cliente,\n\n` +
-                 `Segue em anexo o orçamento #${orcamento.numero} para os serviços de funilaria em seu veículo ${orcamento.veiculo}.\n\n` +
-                 `Valor Total: R$ ${orcamento.total.toFixed(2)}\n` +
-                 `Data: ${orcamento.data}\n\n` +
-                 `IMPORTANTE: O arquivo PDF foi baixado no seu computador. Por favor, anexe-o a este email antes de enviar.\n\n` +
-                 `Condições:\n` +
-                 `• Validade: 15 dias\n` +
-                 `• À vista: 10% desconto\n` +
-                 `• Cartão: até 6x sem juros\n` +
-                 `• Aceitamos seguradoras\n\n` +
-                 `Ficamos à disposição para esclarecimentos.\n\n` +
-                 `Atenciosamente,\n` +
-                 `Auto Funilaria Exemplo`;
-    
-    const emailURL = `mailto:${email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-    window.location.href = emailURL;
-    
-    showNotification('PDF baixado! Anexe o arquivo ao email.');
-}
+        // Função para imprimir PDF
+        function imprimirPDF(orcamento) {
+            // Gerar HTML do orçamento
+            const htmlOrcamento = gerarHTMLOrcamento(orcamento);
 
-// Função para baixar PDF
-function baixarPDF(orcamento) {
-    try {
-        // Gerar HTML do orçamento
-        const htmlOrcamento = gerarHTMLOrcamento(orcamento);
-        
-        // Criar um elemento temporário para renderizar o HTML
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(htmlOrcamento);
-        printWindow.document.close();
-        
-        // Aguardar carregamento
-        printWindow.onload = function() {
-            // Simular download (na verdade abre para impressão/salvar como PDF)
-            printWindow.print();
-            
-            // Fechar janela após um tempo
-            setTimeout(() => {
-                printWindow.close();
-            }, 1000);
-        };
-        
-        showNotification('Abrindo PDF para download/impressão...');
-        
-    } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        alert('Erro ao gerar PDF. Tente novamente.');
-    }
-}
+            // Abrir janela de impressão
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(htmlOrcamento);
+            printWindow.document.close();
 
-// Função para imprimir PDF
-function imprimirPDF(orcamento) {
-    // Gerar HTML do orçamento
-    const htmlOrcamento = gerarHTMLOrcamento(orcamento);
-    
-    // Abrir janela de impressão
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(htmlOrcamento);
-    printWindow.document.close();
-    
-    // Aguardar carregamento e imprimir
-    printWindow.onload = function() {
-        printWindow.print();
-        printWindow.onafterprint = function() {
-            printWindow.close();
-        };
-    };
-    
-    // Fechar modal
-    document.getElementById('modal-opcoes').style.display = 'none';
-    
-    showNotification('Abrindo para impressão...');
-}
+            // Aguardar carregamento e imprimir
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.onafterprint = function () {
+                    printWindow.close();
+                };
+            };
 
-// Função para gerar texto do orçamento (WhatsApp/Email)
-function gerarTextoOrcamento(orcamento) {
-    let texto = `🔧 *ORÇAMENTO DE FUNILARIA* 🔧\n\n`;
-    texto += `📋 *Orçamento:* #${orcamento.numero}\n`;
-    texto += `📅 *Data:* ${orcamento.data}\n`;
-    texto += `🚗 *Veículo:* ${orcamento.veiculo}\n\n`;
-    
-    texto += `📝 *ITENS:*\n`;
-    texto += `${'─'.repeat(30)}\n`;
-    
-    orcamento.itens.forEach(item => {
-        texto += `• ${item.part}\n`;
-        texto += `  ${item.repairType}\n`;
-        texto += `  💰 R$ ${item.price.toFixed(2)}\n\n`;
-    });
-    
-    texto += `${'─'.repeat(30)}\n`;
-    texto += `💰 *TOTAL: R$ ${orcamento.total.toFixed(2)}*\n\n`;
-    
-    texto += `ℹ️ *INFORMAÇÕES:*\n`;
-    texto += `• Validade: 15 dias\n`;
-    texto += `• À vista: 10% desconto\n`;
-    texto += `• Cartão: até 6x sem juros\n`;
-    texto += `• Aceitamos seguradoras\n\n`;
-    
-    texto += `📞 *CONTATO:*\n`;
-    texto += `Auto Funilaria Exemplo\n`;
-    texto += `📍 Av. Principal, 1234 - Centro\n`;
-    texto += `☎️ (11) 1234-5678\n`;
-    texto += `📱 (11) 91234-5678\n`;
-    texto += `✉️ contato@autofunilaria.com.br`;
-    
-    return texto;
-}
+            // Fechar modal
+            document.getElementById('modal-opcoes').style.display = 'none';
 
-// Função para gerar HTML do orçamento (Impressão/PDF)
-function gerarHTMLOrcamento(orcamento) {
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Orçamento #${orcamento.numero}</title>
-            <meta charset="utf-8">
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                    padding: 20px; 
-                    background: white;
-                    color: #333;
-                    line-height: 1.6;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 3px solid #2c5aa0;
-                }
-                .header h1 { 
-                    color: #2c5aa0; 
-                    font-size: 28px; 
-                    margin-bottom: 10px;
-                    font-weight: bold;
-                }
-                .header .contact {
-                    font-size: 14px;
-                    color: #666;
-                    line-height: 1.5;
-                }
-                .info-section {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 30px;
-                    padding: 20px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-radius: 8px;
-                    border: 1px solid #dee2e6;
-                }
-                .info-item {
-                    text-align: center;
-                    flex: 1;
-                }
-                .info-item strong {
-                    display: block;
-                    color: #2c5aa0;
-                    margin-bottom: 8px;
-                    font-size: 16px;
-                    font-weight: bold;
-                }
-                .info-item span {
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #333;
-                }
-                .items-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    border-radius: 8px;
-                    overflow: hidden;
-                }
-                .items-table th {
-                    background: linear-gradient(135deg, #2c5aa0 0%, #1a4480 100%);
-                    color: white;
-                    padding: 15px 12px;
-                    text-align: left;
-                    font-weight: bold;
-                    font-size: 16px;
-                }
-                .items-table td {
-                    padding: 12px;
-                    border-bottom: 1px solid #dee2e6;
-                    font-size: 14px;
-                }
-                .items-table tr:nth-child(even) {
-                    background: #f8f9fa;
-                }
-                .items-table tr:hover {
-                    background: #e3f2fd;
-                }
-                .total-section {
-                    text-align: right;
-                    margin-bottom: 30px;
-                    padding: 25px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-radius: 8px;
-                    border: 2px solid #2c5aa0;
-                }
-                .total-label {
-                    font-size: 20px;
-                    margin-bottom: 10px;
-                    color: #666;
-                }
-                .total-value {
-                    font-size: 32px;
-                    font-weight: bold;
-                    color: #2c5aa0;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-                }
-                .conditions {
-                    margin-bottom: 30px;
-                    padding: 20px;
-                    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-                    border-left: 5px solid #ffc107;
-                    border-radius: 0 8px 8px 0;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .conditions h3 {
-                    color: #856404;
-                    margin-bottom: 15px;
-                    font-size: 18px;
-                }
-                .conditions ul {
-                    list-style: none;
-                    padding-left: 0;
-                }
-                .conditions li {
-                    margin-bottom: 8px;
-                    color: #856404;
-                    font-size: 14px;
-                    padding-left: 20px;
-                    position: relative;
-                }
-                .conditions li:before {
-                    content: "✓";
-                    position: absolute;
-                    left: 0;
-                    color: #28a745;
-                    font-weight: bold;
-                }
-                .footer {
-                    text-align: center;
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 2px solid #dee2e6;
-                    color: #666;
-                    font-size: 12px;
-                }
-                .watermark {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 120px;
-                    opacity: 0.03;
-                    pointer-events: none;
-                    z-index: -1;
-                    color: #2c5aa0;
-                    font-weight: bold;
-                }
-                @media print {
-                    body { 
-                        padding: 15px; 
-                        font-size: 12px;
-                    }
-                    .header { page-break-inside: avoid; }
-                    .items-table { page-break-inside: avoid; }
-                    .total-section { page-break-inside: avoid; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="watermark">ORÇAMENTO</div>
-            
-            <div class="header">
-                <h1>🔧 AUTO FUNILARIA EXEMPLO</h1>
-                <div class="contact">
-                    📍 Av. Principal, 1234 - Centro<br>
-                    ☎️ Tel: (11) 1234-5678 | 📱 WhatsApp: (11) 91234-5678<br>
-                    ✉️ E-mail: contato@autofunilaria.com.br
-                </div>
-            </div>
+            showNotification('Abrindo para impressão...');
+        }
 
-            <div class="info-section">
-                <div class="info-item">
-                    <strong>📋 Orçamento</strong>
-                    <span>#${orcamento.numero}</span>
-                </div>
-                <div class="info-item">
-                    <strong>📅 Data</strong>
-                    <span>${orcamento.data}</span>
-                </div>
-                <div class="info-item">
-                    <strong>🚗 Veículo</strong>
-                    <span>${orcamento.veiculo}</span>
-                </div>
-            </div>
+        // Função para baixar PDF (funciona em mobile)
+        function baixarPDF(orcamento) {
+            try {
+                const htmlContent = gerarHTMLOrcamento(orcamento);
+                const filename = `orcamento_${orcamento.numero}.html`;
 
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>🔧 Peça/Serviço</th>
-                        <th>⚙️ Tipo de Reparo</th>
-                        <th style="text-align: right;">💰 Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${orcamento.itens.map(item => `
-                        <tr>
-                            <td><strong>${item.part}</strong></td>
-                            <td>${item.repairType}</td>
-                            <td style="text-align: right; font-weight: bold; color: #2c5aa0;">R$ ${item.price.toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+                // Criar blob e download
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
 
-            <div class="total-section">
-                <div class="total-label">💰 Valor Total:</div>
-                <div class="total-value">R$ ${orcamento.total.toFixed(2)}</div>
-            </div>
+                // Criar link temporário
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.style.display = 'none';
 
-            <div class="conditions">
-                <h3>📋 Condições e Informações:</h3>
-                <ul>
-                    <li>Validade do orçamento: 15 dias</li>
-                    <li>Pagamento à vista: 10% de desconto</li>
-                    <li>Cartão de crédito: até 6x sem juros</li>
-                    <li>Aceitamos seguradoras credenciadas</li>
-                    <li>Garantia de 90 dias nos serviços realizados</li>
-                    <li>Mão de obra especializada e qualificada</li>
-                </ul>
-            </div>
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 
-            <div class="footer">
-                📄 Orçamento gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}<br>
-                <strong>Auto Funilaria Exemplo</strong> - Sua confiança é nossa prioridade
-            </div>
-        </body>
-        </html>
-    `;
-}
+                document.getElementById('modal-opcoes').style.display = 'none';
+                showNotification('Download iniciado!');
 
-// Função para mostrar notificações (se não existir)
-function showNotification(message) {
-    // Criar elemento de notificação se não existir
-    let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            } catch (error) {
+                console.error('Erro ao baixar:', error);
+                showNotification('Erro ao baixar arquivo!', 'error');
+            }
+        }
+        // Função para gerar texto do orçamento (WhatsApp/Email)
+        // Texto do orçamento otimizado
+        function gerarTextoOrcamento(orcamento) {
+            let texto = `🔧 *ORÇAMENTO DE FUNILARIA* 🔧\n\n`;
+            texto += `📋 *Orçamento:* #${orcamento.numero}\n`;
+            texto += `📅 *Data:* ${orcamento.data}\n`;
+            texto += `🚗 *Veículo:* ${orcamento.veiculo}\n\n`;
+            texto += `📝 *ITENS:*\n${'─'.repeat(30)}\n`;
+
+            orcamento.itens.forEach(item => {
+                texto += `• ${item.part}\n  ${item.repairType}\n  💰 R$ ${item.price.toFixed(2)}\n\n`;
+            });
+
+            texto += `${'─'.repeat(30)}\n`;
+            texto += `💰 *TOTAL: R$ ${orcamento.total.toFixed(2)}*\n\n`;
+            texto += `ℹ️ *CONDIÇÕES:*\n• Validade: 15 dias\n• À vista: 10% desconto\n• Cartão: até 6x sem juros\n• Aceitamos seguradoras\n\n`;
+            texto += `📞 *CONTATO:*\nAuto Funilaria Exemplo\n📍 Av. Principal, 1234 - Centro\n☎️ (11) 1234-5678\n📱 (11) 91234-5678`;
+
+            return texto;
+        }
+
+        // Função para gerar HTML do orçamento (Impressão)
+        // HTML otimizado para mobile
+        function gerarHTMLOrcamento(orcamento) {
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento #${orcamento.numero}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 15px; 
+            background: white;
+            color: #333;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2c5aa0;
+        }
+        .header h1 { 
+            color: #2c5aa0; 
+            font-size: 20px; 
+            margin-bottom: 8px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .info-item strong {
+            display: block;
+            color: #2c5aa0;
+            margin-bottom: 3px;
+            font-size: 14px;
+        }
+        .items {
+            margin-bottom: 25px;
+        }
+        .item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #2c5aa0;
+        }
+        .item-name { font-weight: bold; margin-bottom: 5px; }
+        .item-type { color: #666; margin-bottom: 5px; }
+        .item-price { 
+            color: #2c5aa0; 
+            font-weight: bold; 
+            font-size: 16px;
+        }
+        .total {
+            text-align: center;
+            padding: 20px;
             background: #2c5aa0;
             color: white;
-            padding: 15px 20px;
             border-radius: 8px;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            font-weight: 500;
-            max-width: 300px;
-        `;
-        document.body.appendChild(notification);
-    }
-    
-    notification.textContent = message;
-    notification.style.transform = 'translateX(0)';
-    
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-    }, 4000);
-}
+            margin-bottom: 25px;
+        }
+        .total-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .conditions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        .conditions h3 { 
+            color: #856404; 
+            margin-bottom: 10px; 
+            font-size: 16px;
+        }
+        .conditions ul { 
+            list-style: none; 
+            color: #856404; 
+        }
+        .conditions li { margin-bottom: 5px; }
+        .footer {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+            margin-top: 25px;
+        }
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 18px; }
+            .total-value { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AUTO FUNILARIA EXEMPLO</h1>
+        <div>Av. Principal, 1234 - Centro</div>
+        <div>Tel: (11) 1234-5678 | WhatsApp: (11) 91234-5678</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Orçamento</strong>
+            #${orcamento.numero}
+        </div>
+        <div class="info-item">
+            <strong>Data</strong>
+            ${orcamento.data}
+        </div>
+        <div class="info-item" style="grid-column: 1 / -1;">
+            <strong>Veículo</strong>
+            ${orcamento.veiculo}
+        </div>
+    </div>
+
+    <div class="items">
+        <h3 style="margin-bottom: 15px; color: #2c5aa0;">Itens do Orçamento:</h3>
+        ${orcamento.itens.map(item => `
+            <div class="item">
+                <div class="item-name">${item.part}</div>
+                <div class="item-type">${item.repairType}</div>
+                <div class="item-price">R$ ${item.price.toFixed(2)}</div>
+            </div>
+        `).join('')}
+    </div>
+
+    <div class="total">
+        <div>Valor Total</div>
+        <div class="total-value">R$ ${orcamento.total.toFixed(2)}</div>
+    </div>
+
+    <div class="conditions">
+        <h3>Condições:</h3>
+        <ul>
+            <li>• Validade: 15 dias</li>
+            <li>• À vista: 10% desconto</li>
+            <li>• Cartão: até 6x sem juros</li>
+            <li>• Aceitamos seguradoras</li>
+            <li>• Garantia: 90 dias</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+    </div>
+</body>
+</html>`;
+        }
+
+        // Notificação melhorada
+        function showNotification(message, type = 'success') {
+            let notification = document.getElementById('notification');
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.id = 'notification';
+                document.body.appendChild(notification);
+            }
+
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107'
+            };
+
+            notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        left: 20px;
+        background: ${colors[type] || colors.success};
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        z-index: 1001;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-100px);
+        transition: transform 0.3s ease;
+        text-align: center;
+        font-weight: 500;
+        max-width: 400px;
+        margin: 0 auto;
+    `;
+
+            notification.textContent = message;
+
+            requestAnimationFrame(() => {
+                notification.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100px)';
+            }, 3000);
+        }
+        // Notificação melhorada
+        function showNotification(message, type = 'success') {
+            let notification = document.getElementById('notification');
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.id = 'notification';
+                document.body.appendChild(notification);
+            }
+
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107'
+            };
+
+            notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        left: 20px;
+        background: ${colors[type] || colors.success};
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        z-index: 1001;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-100px);
+        transition: transform 0.3s ease;
+        text-align: center;
+        font-weight: 500;
+        max-width: 400px;
+        margin: 0 auto;
+    `;
+
+            notification.textContent = message;
+
+            requestAnimationFrame(() => {
+                notification.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100px)';
+            }, 3000);
+        }
         // Função para mostrar notificações
         function showNotification(message) {
             const notification = document.createElement("div");
